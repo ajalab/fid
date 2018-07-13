@@ -14,7 +14,6 @@ const SELECT_UNIT_NUM: u64 = 4096;
 /// ```
 include!(concat!(env!("OUT_DIR"), "/const.rs"));
 
-
 /// A succinct bit vector that supports FID operations (rank and select) in constant time.
 ///
 /// Bits are divided in small and large blocks. Each small block is identified by
@@ -23,24 +22,24 @@ include!(concat!(env!("OUT_DIR"), "/const.rs"));
 /// if its compressed size is less than MAX_CODE_SIZE. Otherwise the bit pattern of the small block is explicitly stored as an index
 /// for the sake of efficiency. This idea originally comes from [2]. For each large block, we store the number of 1s up to its beginning and
 /// a pointer for the index of the first small block.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use fid::{BitVector, FID};
 /// let mut bv = BitVector::new();
 /// bv.push(false); bv.push(true); bv.push(true); bv.push(false);
 /// bv.push(true); bv.push(true); bv.push(false); bv.push(true);
-/// 
+///
 /// assert_eq!(bv.rank0(5), 2);
 /// assert_eq!(bv.rank1(5), 3);
 /// assert_eq!(bv.select0(2), 6);
 /// assert_eq!(bv.select1(2), 4);
 /// ```
-/// 
+///
 /// # References
 /// [1] Gonzalo Navarro and Eliana Providel. 2012. Fast, small, simple rank/select on bitmaps. In Proceedings of the 11th international conference on Experimental Algorithms (SEA'12), Ralf Klasing (Ed.). Springer-Verlag, Berlin, Heidelberg, 295-306. DOI=http://dx.doi.org/10.1007/978-3-642-30850-5_26
-/// 
+///
 /// [2] rsdic by Daisuke Okanohara. [https://github.com/hillbig/rsdic](https://github.com/hillbig/rsdic)
 pub struct BitVector {
     /// Length of the vector (number of bits)
@@ -478,6 +477,7 @@ mod tests {
         }
     }
 
+    const TEST_PROB: &[f64] = &[0.01, 0.5, 0.99];
     const TEST_SIZE: &[u64] = &[
         1,
         SBLOCK_WIDTH / 2,
@@ -496,60 +496,66 @@ mod tests {
 
     #[test]
     fn test_rank1() {
-        for &n in TEST_SIZE {
-            let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
-            let mut bv = BitVector::new();
-            let mut ba = BitArray::new(n as usize);
-            for i in 0..n {
-                let b = rng.gen::<bool>();
-                ba.set_bit(i as usize, b);
-                bv.push(b);
-            }
+        for &p in TEST_PROB {
+            for &n in TEST_SIZE {
+                let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
+                let mut bv = BitVector::new();
+                let mut ba = BitArray::new(n as usize);
+                for i in 0..n {
+                    let b = rng.gen_bool(p);
+                    ba.set_bit(i as usize, b);
+                    bv.push(b);
+                }
 
-            let mut rank = 0;
-            for i in 0..n {
-                assert_eq!(rank, bv.rank1(i));
-                rank += ba.get_bit(i as usize) as u64;
+                let mut rank = 0;
+                for i in 0..n {
+                    assert_eq!(rank, bv.rank1(i));
+                    rank += ba.get_bit(i as usize) as u64;
+                }
             }
         }
     }
 
     #[test]
     fn test_select1() {
-        for &n in TEST_SIZE {
-            let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
-            let mut bv = BitVector::new();
-            let mut select_ans = vec![];
-            for i in 0..n {
-                let b = rng.gen::<bool>();
-                bv.push(b);
-                if b {
-                    select_ans.push(i);
+        for &p in TEST_PROB {
+            for &n in TEST_SIZE {
+                let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
+                let mut bv = BitVector::new();
+                let mut select_ans = vec![];
+                for i in 0..n {
+                    let b = rng.gen_bool(p);
+                    bv.push(b);
+                    if b {
+                        select_ans.push(i);
+                    }
                 }
-            }
 
-            for (i, &r) in select_ans.iter().enumerate() {
-                assert_eq!(bv.select1(i as u64), r);
+                for (i, &r) in select_ans.iter().enumerate() {
+                    assert_eq!(bv.select1(i as u64), r);
+                }
             }
         }
     }
 
     #[test]
     fn test_select0() {
-        for &n in TEST_SIZE {
-            let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
-            let mut bv = BitVector::new();
-            let mut select_ans = vec![];
-            for i in 0..n {
-                let b = rng.gen::<bool>();
-                bv.push(b);
-                if !b {
-                    select_ans.push(i);
+        for &p in TEST_PROB {
+            for &n in TEST_SIZE {
+                let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
+                let mut bv = BitVector::new();
+                let mut select_ans = vec![];
+                for i in 0..n {
+                    let b = rng.gen_bool(p);
+                    bv.push(b);
+                    if !b {
+                        select_ans.push(i);
+                    }
                 }
-            }
 
-            for (i, &r) in select_ans.iter().enumerate() {
-                assert_eq!(bv.select0(i as u64), r);
+                for (i, &r) in select_ans.iter().enumerate() {
+                    assert_eq!(bv.select0(i as u64), r);
+                }
             }
         }
     }
