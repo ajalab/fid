@@ -2,6 +2,11 @@
 name = "fid"
 version = "0.1.0"
 authors = ["Koki Kato <koki.kato1994@gmail.com>"]
+description = "FID (Fully Indexable Dictionary) implementation for Rust"
+repository = "https://github.com/ajalab/fid"
+homepage = "https://github.com/ajalab/fid"
+license = "MIT"
+keywords = ["fid", "fully-indexable-dictionary", "succinct"]
 
 [dev-dependencies]
 rand = "0.5"
