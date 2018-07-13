@@ -14,6 +14,34 @@ const SELECT_UNIT_NUM: u64 = 4096;
 /// ```
 include!(concat!(env!("OUT_DIR"), "/const.rs"));
 
+
+/// A succinct bit vector that supports FID operations (rank and select) in constant time.
+///
+/// Bits are divided in small and large blocks. Each small block is identified by
+/// a class (number of 1s in the block) and an index within the class. Classes are
+/// stored in ceil(log(SBLOCK_WIDTH + 1)) bits. Indices are stored in log(C(SBLOCK_WIDTH, index)) bits with enumerative code
+/// if its compressed size is less than MAX_CODE_SIZE. Otherwise the bit pattern of the small block is explicitly stored as an index
+/// for the sake of efficiency. This idea originally comes from [2]. For each large block, we store the number of 1s up to its beginning and
+/// a pointer for the index of the first small block.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use fid::{BitVector, FID};
+/// let mut bv = BitVector::new();
+/// bv.push(false); bv.push(true); bv.push(true); bv.push(false);
+/// bv.push(true); bv.push(true); bv.push(false); bv.push(true);
+/// 
+/// assert_eq!(bv.rank0(5), 2);
+/// assert_eq!(bv.rank1(5), 3);
+/// assert_eq!(bv.select0(2), 6);
+/// assert_eq!(bv.select1(2), 4);
+/// ```
+/// 
+/// # References
+/// [1] Gonzalo Navarro and Eliana Providel. 2012. Fast, small, simple rank/select on bitmaps. In Proceedings of the 11th international conference on Experimental Algorithms (SEA'12), Ralf Klasing (Ed.). Springer-Verlag, Berlin, Heidelberg, 295-306. DOI=http://dx.doi.org/10.1007/978-3-642-30850-5_26
+/// 
+/// [2] rsdic by Daisuke Okanohara. [https://github.com/hillbig/rsdic](https://github.com/hillbig/rsdic)
 pub struct BitVector {
     /// Length of the vector (number of bits)
     len: u64,
