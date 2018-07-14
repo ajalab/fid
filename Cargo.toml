@@ -6,7 +6,7 @@ description = "FID (Fully Indexable Dictionary) implementation for Rust"
 repository = "https://github.com/ajalab/fid"
 homepage = "https://github.com/ajalab/fid"
 license = "MIT"
-keywords = ["fid", "fully-indexable-dictionary", "succinct"]
+keywords = ["fid", "bit-vector", "succinct"]
 
 [dev-dependencies]
 rand = "0.5"
