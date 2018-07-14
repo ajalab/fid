@@ -1,5 +1,8 @@
 # FID
 
+[![Crates.io](https://img.shields.io/crates/v/fid.svg)](https://crates.io/crates/fid)
+[![docs.rs](https://docs.rs/fid/badge.svg)](https://docs.rs/fid)
+
  This crate provides a succinct data structure for bit vectors that support two kinds of bit operations in constant-time:
 
  - `rank(i)` computes the number of 0s (or 1s) in [0..i)
@@ -9,7 +12,15 @@
 
 ## Usage
 
+In your `Cargo.toml`
+```
+[dependencies]
+rand = "0.5"
+```
+then
 ```rust
+extern crate fid;
+
 use fid::{BitVector, FID};
 
 let mut bv = BitVector::new();
