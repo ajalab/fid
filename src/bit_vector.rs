@@ -147,6 +147,36 @@ impl FID for BitVector {
         self.len
     }
 
+    fn get(&self, i: u64) -> bool {
+        debug_assert!(i < self.len);
+
+        let excess = self.len - i;
+        let last_sblock_width = self.len % SBLOCK_WIDTH;
+        if excess <= last_sblock_width {
+            return (self.last_sblock_bits >> (last_sblock_width - excess)) & 1 == 1;
+        }
+        let lblock_pos = i / LBLOCK_WIDTH;
+        let sblock_start_pos = lblock_pos * (LBLOCK_WIDTH / SBLOCK_WIDTH);
+        let sblock_end_pos = i / SBLOCK_WIDTH;
+        let mut pointer = self.pointers[lblock_pos as usize];
+
+        for j in sblock_start_pos..sblock_end_pos {
+            let k = self.sblocks.get_word(j as usize, SBLOCK_SIZE as usize);
+            pointer += CODE_SIZE[k as usize];
+        }
+
+        let sblock = self.sblocks
+            .get_word(sblock_end_pos as usize, SBLOCK_SIZE as usize);
+        let code_size = CODE_SIZE[sblock as usize];
+        let index = self.indices.get_slice(pointer as usize, code_size as usize);
+
+        decode_bit(
+            index,
+            sblock as u8,
+            (i - sblock_end_pos * SBLOCK_WIDTH) as u8,
+        )
+    }
+
     fn rank1(&self, i: u64) -> u64 {
         if self.len <= i {
             return self.ones;
@@ -404,6 +434,26 @@ fn decode_select0(mut index: u64, k: u8, r: u8) -> u64 {
     return 64;
 }
 
+fn decode_bit(mut index: u64, k: u8, p: u8) -> bool {
+    let code_size = CODE_SIZE[k as usize];
+    if code_size == SBLOCK_WIDTH {
+        return (index >> p) & 1 == 1;
+    }
+
+    let mut l = 0;
+    for i in 0..(p as u64) {
+        let base = COMBINATION[(SBLOCK_WIDTH - i - 1) as usize][(k - l) as usize];
+        if index >= base {
+            index -= base;
+            l = l + 1;
+            if l == k {
+                break;
+            }
+        }
+    }
+    index >= COMBINATION[(SBLOCK_WIDTH - (p as u64) - 1) as usize][(k - l) as usize]
+}
+
 #[cfg(test)]
 mod tests {
     extern crate rand;
@@ -473,6 +523,27 @@ mod tests {
                 }
                 assert_eq!(decode_select0(encode(bits, k).0, k, r), ans);
                 ans += 1;
+            }
+        }
+    }
+
+    #[test]
+    fn test_decode_bit() {
+        let n = 100;
+        let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
+        for _ in 0..n {
+            let bits: u64 = rng.gen();
+            let k = bits.count_ones() as u8;
+            for p in 0..64 {
+                let ans = (bits >> p) & 1 == 1;
+                assert_eq!(
+                    decode_bit(encode(bits, k).0, k, p),
+                    ans,
+                    "the {}-th bit of {:064b} is {}",
+                    p,
+                    bits,
+                    ans as u8,
+                );
             }
         }
     }
@@ -555,6 +626,26 @@ mod tests {
 
                 for (i, &r) in select_ans.iter().enumerate() {
                     assert_eq!(bv.select0(i as u64), r);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_get() {
+        for &p in TEST_PROB {
+            for &n in TEST_SIZE {
+                let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
+                let mut bv = BitVector::new();
+                let mut ba = BitArray::new(n as usize);
+                for i in 0..n {
+                    let b = rng.gen_bool(p);
+                    ba.set_bit(i as usize, b);
+                    bv.push(b);
+                }
+
+                for i in 0..n {
+                    assert_eq!(bv.get(i), ba.get_bit(i as usize));
                 }
             }
         }

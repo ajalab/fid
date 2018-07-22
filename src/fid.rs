@@ -47,4 +47,9 @@ pub trait FID {
     fn select1(&self, r: u64) -> u64 {
         self.select(true, r)
     }
+
+    /// Returns the i-th bit.
+    fn get(&self, i: u64) -> bool {
+        self.rank1(i + 1) - self.rank1(i) > 0
+    }
 }
