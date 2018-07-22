@@ -1,5 +1,5 @@
-use std::mem;
 use std::fmt;
+use std::mem;
 
 type Block = u64;
 const BLOCK_SIZE: usize = mem::size_of::<Block>() * 8;
@@ -21,10 +21,15 @@ impl BitArray {
         BitArray::new(word_size * len)
     }
 
+    /// Returns the size (byte) of the array.
+    pub fn size(&self) -> usize {
+        BLOCK_SIZE * self.blocks.len()
+    }
+
     /// Sets the bit at position `i` to `b`.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// let mut ba = fid::BitArray::new(8);
     /// ba.set_bit(3, true);
@@ -50,7 +55,7 @@ impl BitArray {
     }
 
     /// Gets the bit at position `i`.
-    /// 
+    ///
     /// # Panics
     /// Panics if the specified position exceeds the capacity.
     pub fn get_bit(&self, i: usize) -> bool {
@@ -63,7 +68,7 @@ impl BitArray {
     }
 
     /// Gets the slice of size `slice_size` at position `i`.
-    /// 
+    ///
     /// # Panics
     /// Panics if `slice_size` is greater than 64.
     pub fn set_slice(&mut self, i: usize, slice_size: usize, slice: u64) {
@@ -90,9 +95,9 @@ impl BitArray {
     }
 
     /// Sets the `i`-th word of size `word_size` to `word`.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// let mut ba = fid::BitArray::new(128);
     /// ba.set_word(0, 12, 0b0101_1010_1100);
@@ -106,7 +111,7 @@ impl BitArray {
     }
 
     /// Gets the slice of size `slice_size` at position `i`.
-    /// 
+    ///
     /// # Panics
     /// Panics if the end position of the slice exceeds the capacity or `slice_size` is greater than 64.
     pub fn get_slice(&self, i: usize, slice_size: usize) -> u64 {
@@ -136,7 +141,8 @@ impl BitArray {
 
     /// Resizes the array.
     pub fn resize(&mut self, new_size: usize) {
-        self.blocks.resize((new_size + BLOCK_SIZE - 1) / BLOCK_SIZE, 0);
+        self.blocks
+            .resize((new_size + BLOCK_SIZE - 1) / BLOCK_SIZE, 0);
     }
 }
 

@@ -1,6 +1,7 @@
 use bit_array::BitArray;
 use fid::FID;
 use std::fmt;
+use std::mem;
 
 const SBLOCK_WIDTH: u64 = 64;
 const SBLOCK_SIZE: u64 = 7; // ceil(log(SBLOCK_SIZE + 1))
@@ -118,6 +119,17 @@ impl BitVector {
                 self.pointers.push(self.pointer);
             }
         }
+    }
+
+    /// Returns the total size of the bit vector.
+    pub fn size(&self) -> usize {
+        mem::size_of::<Self>()
+            + self.sblocks.size()
+            + self.lblocks.len() * mem::size_of::<u64>()
+            + self.indices.size()
+            + self.pointers.len() * mem::size_of::<u64>()
+            + self.select0_unit_pointers.len() * mem::size_of::<usize>()
+            + self.select1_unit_pointers.len() * mem::size_of::<usize>()
     }
 }
 
