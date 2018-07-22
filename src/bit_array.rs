@@ -9,6 +9,7 @@ pub struct BitArray {
 }
 
 impl BitArray {
+    /// Returns a zero-cleared bit array of size `size`.
     pub fn new(size: usize) -> Self {
         let n_blocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
         BitArray {
@@ -29,9 +30,13 @@ impl BitArray {
     /// ba.set_bit(3, true);
     /// assert_eq!(ba.get_bit(3), true);
     /// assert_eq!(ba.get_bit(4), false);
+    /// ba.set_bit(256, true);  // automatically extended
+    /// assert_eq!(ba.get_bit(256), true);
     /// ```
     pub fn set_bit(&mut self, i: usize, b: bool) {
-        debug_assert!(i < self.blocks.len() * BLOCK_SIZE);
+        if i >= self.blocks.len() * BLOCK_SIZE {
+            self.resize(i + 1);
+        }
 
         let k = i / BLOCK_SIZE;
         let p = i % BLOCK_SIZE;
@@ -45,13 +50,22 @@ impl BitArray {
     }
 
     /// Gets the bit at position `i`.
+    /// 
+    /// # Panics
+    /// Panics if the specified position exceeds the capacity.
     pub fn get_bit(&self, i: usize) -> bool {
+        debug_assert!(i < self.blocks.len() * BLOCK_SIZE);
+
         let k = i / BLOCK_SIZE;
         let p = i % BLOCK_SIZE;
 
         ((self.blocks[k] << p) >> (BLOCK_SIZE - 1)) == 1
     }
 
+    /// Gets the slice of size `slice_size` at position `i`.
+    /// 
+    /// # Panics
+    /// Panics if `slice_size` is greater than 64.
     pub fn set_slice(&mut self, i: usize, slice_size: usize, slice: u64) {
         debug_assert!(slice_size <= 64);
         if slice_size == 0 {
@@ -91,8 +105,14 @@ impl BitArray {
         self.set_slice(i * word_size, word_size, word);
     }
 
+    /// Gets the slice of size `slice_size` at position `i`.
+    /// 
+    /// # Panics
+    /// Panics if the end position of the slice exceeds the capacity or `slice_size` is greater than 64.
     pub fn get_slice(&self, i: usize, slice_size: usize) -> u64 {
         debug_assert!(slice_size <= 64);
+        debug_assert!(i + slice_size <= self.blocks.len() * BLOCK_SIZE);
+
         if slice_size == 0 {
             return 0;
         }
