@@ -23,7 +23,7 @@ impl BitArray {
 
     /// Returns the size (byte) of the array.
     pub fn size(&self) -> usize {
-        BLOCK_SIZE * self.blocks.len()
+        mem::size_of::<Block>() * self.blocks.len()
     }
 
     /// Sets the bit at position `i` to `b`.
