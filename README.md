@@ -15,7 +15,7 @@
 In your `Cargo.toml`
 ```
 [dependencies]
-fid = "0.1.2"
+fid = "0.1.3"
 ```
 then
 ```rust
