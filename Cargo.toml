@@ -10,6 +10,7 @@ documentation = "https://docs.rs/fid"
 license = "MIT"
 keywords = ["fid", "bit-vector", "succinct"]
 categories = ["data-structures"]
+edition = "2018"
 
 [dev-dependencies]
 rand = "0.5"

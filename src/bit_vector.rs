@@ -1,5 +1,5 @@
-use bit_array::BitArray;
-use fid::FID;
+use crate::bit_array::BitArray;
+use crate::fid::FID;
 use std::fmt;
 use std::mem;
 
@@ -178,7 +178,8 @@ impl FID for BitVector {
             pointer += CODE_SIZE[k as usize];
         }
 
-        let sblock = self.sblocks
+        let sblock = self
+            .sblocks
             .get_word(sblock_end_pos as usize, SBLOCK_SIZE as usize);
         let code_size = CODE_SIZE[sblock as usize];
         let index = self.indices.get_slice(pointer as usize, code_size as usize);
@@ -212,7 +213,8 @@ impl FID for BitVector {
             rank += k;
             pointer += CODE_SIZE[k as usize];
         }
-        let sblock = self.sblocks
+        let sblock = self
+            .sblocks
             .get_word(sblock_end_pos as usize, SBLOCK_SIZE as usize);
         let code_size = CODE_SIZE[sblock as usize];
         let index = self.indices.get_slice(pointer as usize, code_size as usize);
