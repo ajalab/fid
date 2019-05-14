@@ -35,6 +35,6 @@ mod bit_array;
 mod bit_vector;
 mod fid;
 
-pub use bit_array::BitArray;
-pub use bit_vector::BitVector;
-pub use fid::FID;
+pub use crate::bit_array::BitArray;
+pub use crate::bit_vector::BitVector;
+pub use crate::fid::FID;
