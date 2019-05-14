@@ -1,5 +1,6 @@
 use crate::bit_array::BitArray;
 use crate::fid::FID;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::mem;
 
@@ -43,6 +44,7 @@ include!(concat!(env!("OUT_DIR"), "/const.rs"));
 /// [1] Gonzalo Navarro and Eliana Providel. 2012. Fast, small, simple rank/select on bitmaps. In Proceedings of the 11th international conference on Experimental Algorithms (SEA'12), Ralf Klasing (Ed.). Springer-Verlag, Berlin, Heidelberg, 295-306. DOI=http://dx.doi.org/10.1007/978-3-642-30850-5_26
 ///
 /// [2] rsdic by Daisuke Okanohara. [https://github.com/hillbig/rsdic](https://github.com/hillbig/rsdic)
+#[derive(Serialize, Deserialize)]
 pub struct BitVector {
     /// Length of the vector (number of bits)
     len: u64,
@@ -666,4 +668,28 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_serialize_rank1() {
+        for &p in TEST_PROB {
+            for &n in TEST_SIZE {
+                let mut rng: StdRng = SeedableRng::from_seed([0; 32]);
+                let mut bv = BitVector::new();
+                let mut ba = BitArray::new(n as usize);
+                for i in 0..n {
+                    let b = rng.gen_bool(p);
+                    ba.set_bit(i as usize, b);
+                    bv.push(b);
+                }
+
+                let encoded = bincode::serialize(&bv).unwrap();
+                let bv: BitVector = bincode::deserialize(&encoded).unwrap();
+
+                let mut rank = 0;
+                for i in 0..n {
+                    assert_eq!(rank, bv.rank1(i));
+                    rank += ba.get_bit(i as usize) as u64;
+                }
+            }
+        }
+    }
 }
