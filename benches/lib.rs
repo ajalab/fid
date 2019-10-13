@@ -1,4 +1,5 @@
 #![feature(test)]
+#![allow(clippy::unreadable_literal)]
 
 extern crate fid;
 extern crate rand;

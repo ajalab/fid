@@ -129,11 +129,11 @@ impl BitArray {
         let p = i % BLOCK_SIZE;
         let excess = (i + slice_size).saturating_sub((k + 1) * BLOCK_SIZE);
         if excess == 0 {
-            return (self.blocks[k] & (!0 >> p)) >> (BLOCK_SIZE - p - slice_size);
+            (self.blocks[k] & (!0 >> p)) >> (BLOCK_SIZE - p - slice_size)
         } else {
             let w1 = self.blocks[k] & (!0 >> p);
             let w2 = self.blocks[k + 1] >> (BLOCK_SIZE - excess);
-            return w1 << excess | w2;
+            w1 << excess | w2
         }
     }
 
@@ -153,7 +153,7 @@ impl fmt::Debug for BitArray {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.blocks
             .iter()
-            .map(|b| write!(f, "{:0w$b}\n", b, w = BLOCK_SIZE))
+            .map(|b| writeln!(f, "{:0w$b}", b, w = BLOCK_SIZE))
             .collect()
     }
 }
@@ -197,7 +197,7 @@ mod tests {
         for i in 0..145 {
             if i == points[j] {
                 assert_eq!(ba.get_bit(i), true);
-                j = j + 1;
+                j += 1;
             } else {
                 assert_eq!(ba.get_bit(i), false);
             }
