@@ -168,6 +168,10 @@ impl FID for BitVector {
         self.len
     }
 
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     fn get(&self, i: u64) -> bool {
         debug_assert!(i < self.len);
 
