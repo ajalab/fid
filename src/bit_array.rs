@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 type Block = u64;
 const BLOCK_SIZE: usize = mem::size_of::<Block>() * 8;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct BitArray {
     blocks: Vec<Block>,
 }
