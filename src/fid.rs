@@ -4,8 +4,10 @@ pub trait FID {
     fn len(&self) -> u64;
 
     /// Returns true if the structure is empty.
-    fn is_empty(&self) -> bool;
-
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    
     /// Compute the number of bits in [0..i).
     fn rank(&self, b: bool, i: u64) -> u64 {
         if b {
