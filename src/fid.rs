@@ -3,6 +3,11 @@ pub trait FID {
     /// Returns the total number of bits.
     fn len(&self) -> u64;
 
+    /// Returns true if the structure is empty.
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    
     /// Compute the number of bits in [0..i).
     fn rank(&self, b: bool, i: u64) -> u64 {
         if b {
@@ -29,13 +34,13 @@ pub trait FID {
         while e - s > 1 {
             let m = (s + e) / 2;
             let rank = self.rank(b, m);
-            if r + 1 <= rank {
+            if r < rank {
                 e = m
             } else {
                 s = m
             }
         }
-        return s;
+        s
     }
 
     /// Locate the position of the (r + 1)-th 0.
