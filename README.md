@@ -1,5 +1,8 @@
 # FID
 
+>[!CAUTION]
+> This project is no longer maintained.
+
 [![Crates.io](https://img.shields.io/crates/v/fid.svg)](https://crates.io/crates/fid)
 [![docs.rs](https://docs.rs/fid/badge.svg)](https://docs.rs/fid)
 [![Build Status](https://travis-ci.com/ajalab/fid.svg?branch=master)](https://travis-ci.com/ajalab/fid)
